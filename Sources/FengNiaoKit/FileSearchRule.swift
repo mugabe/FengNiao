@@ -45,7 +45,9 @@ extension RegPatternSearchRule {
             let matches = reg.matches(in: content, options: [], range: content.fullRange)
             for checkingResult in matches {
                 let extracted = nsstring.substring(with: checkingResult.range(at: 1))
-                result.insert(extracted.plainFileName(extensions: extensions) )
+                let plainKey = extracted.plainFileName(extensions: extensions)
+                let key = plainKey.prefix(1).lowercased() + plainKey.dropFirst()
+                result.insert(key)
             }
         }
         
@@ -72,7 +74,7 @@ struct ObjCImageSearchRule: RegPatternSearchRule {
 
 struct SwiftImageSearchRule: RegPatternSearchRule {
     let extensions: [String]
-    let patterns = ["\"(.*?)\"", "R.image.(.*?)\\(\\)"]
+    let patterns = ["Image\\(\"([^\"]+)\"\\)", "R\\.image\\.(.*?)\\(\\)"]
 }
 
 struct XibImageSearchRule: RegPatternSearchRule {

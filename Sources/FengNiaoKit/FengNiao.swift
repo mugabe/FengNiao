@@ -196,7 +196,9 @@ public struct FengNiao {
                 continue
             }
             
-            let key = file.plainFileName(extensions: resourceExtensions)
+            let plainKey = file.plainFileName(extensions: resourceExtensions)
+            let key = plainKey.prefix(1).lowercased() + plainKey.dropFirst()
+
             if let existing = files[key] {
                 files[key] = existing.union([file])
             } else {

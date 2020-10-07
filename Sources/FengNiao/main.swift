@@ -36,6 +36,13 @@ let EX_OK: Int32 = 0
 let EX_USAGE: Int32 = 64
 #endif
 
+final class StandardErrorOutputStream: TextOutputStream {
+    func write(_ string: String) {
+        FileHandle.standardError.write(Data(string.utf8))
+    }
+}
+var errorStream = StandardErrorOutputStream()
+
 let cli = CommandLineKit.CommandLine()
 cli.formatOutput = { s, type in
     var str: String
@@ -57,6 +64,11 @@ let isForceOption = BoolOption(
     longFlag: "force",
     helpMessage: "Delete the found unused files without asking.")
 cli.addOption(isForceOption)
+
+let isInterruptOption = BoolOption(
+    longFlag: "interrupt", 
+    helpMessage: "Interrupt execution with error if unused files found.")
+cli.addOption(isInterruptOption)
 
 let excludePathOption = MultiStringOption(
     shortFlag: "e", longFlag: "exclude",
@@ -112,6 +124,7 @@ if versionOption.value {
 
 let projectPath = projectPathOption.value ?? "."
 let isForce = isForceOption.value
+let isInterrupt = isInterruptOption.value
 let excludePaths = excludePathOption.value ?? []
 let resourceExtentions = resourceExtOption.value ?? ["imageset", "jpg", "png", "gif", "pdf"]
 let fileExtensions = fileExtOption.value ?? ["h", "m", "mm", "swift", "xib", "storyboard", "plist"]
@@ -142,6 +155,13 @@ do {
 if unusedFiles.isEmpty {
     print("😎 Hu, you have no unused resources in path: \(Path(projectPath).absolute()).".green.bold)
     exit(EX_OK)
+}
+else if isInterrupt {
+    print("❌ Unused files found", to: &errorStream)
+    for file in unusedFiles.sorted(by: { $0.size > $1.size }) {
+        print("\(file.readableSize) \(file.path.string)", to: &errorStream)
+    }
+    exit(EX_USAGE)
 }
 
 if !isForce {
