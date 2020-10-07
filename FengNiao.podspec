@@ -6,7 +6,6 @@ Pod::Spec.new do |spec|
   spec.license                      = 'MIT'
   spec.authors                      = { 'FengNiao' => 'https://github.com/onevcat' }
   spec.source                       = { :git => 'git@github.com:mugabe/FengNiao.git', :branch => "rswift" }
-  spec.resources                    = 'FengNiao'
   spec.preserve_paths               = 'FengNiao'
   spec.prepare_command              = 'swift package clean && swift build -c release && mv .build/release/FengNiao .'
 end
